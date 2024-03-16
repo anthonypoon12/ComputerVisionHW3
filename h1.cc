@@ -40,7 +40,7 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
     return;
   }
 
-  // Image newImage = image;
+  Image newImage = image;
 
   // Number of rows and columns in the image
   size_t numRows = image.num_rows();
@@ -55,8 +55,6 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
     {0, 0, 0},
     {-1, -2, -1}
   };
-
-  vector<double> allValues = {};
 
   for (int i = 1; i < numRows - 1; i++) {
     for (int j = 1; j < numCols - 1; j++) {
@@ -73,30 +71,12 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
       }
 
       double gradient_magnitude = sqrt(newValue1*newValue1 + newValue2*newValue2);
-      allValues.push_back(gradient_magnitude);
-    }
-  }
-
-
-  double min_val = *std::min_element(allValues.begin(), allValues.end());
-  double max_val = *std::max_element(allValues.begin(), allValues.end());
-
-  for (double& value : allValues) {
-      value = (value - min_val) / (max_val - min_val);
-  }
-
-
-  for (int i = 1; i < numRows - 1; i++) {
-    for (int j = 1; j < numCols - 1; j++) {
-        double value = allValues[0];
-        allValues.erase(allValues.begin()); // Erase the first element
-
-        image.SetPixel(i, j, value * 255);
+      newImage.SetPixel(i, j, gradient_magnitude);
     }
   }
 
   // if (!WriteImage(output_filename, newImage)){
-  if (!WriteImage(output_filename, image)){
+  if (!WriteImage(output_filename, newImage)){
     cout << "Can't write to file " << output_filename << endl;
   }
 }
