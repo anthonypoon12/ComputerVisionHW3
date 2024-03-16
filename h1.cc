@@ -11,6 +11,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 using namespace std;
 using namespace ComputerVisionProjects;
@@ -27,19 +29,6 @@ bool isInBounds(Image image, int row, int col) {
   return true;
 }
 
-int applyFilter(Image image, int row, int col, vector<vector<int>> filter) {
-  int sum = 0;
-  for (int i = 0; i < filter.size(); i++) {
-    for (int j = 0; j < filter[i].size(); j++) {
-      int newRow = row + (i - filter.size() / 2);
-      int newCol = col + (j - filter[i].size() / 2);
-      if (isInBounds(image, newRow, newCol))
-        sum += image.GetPixel(newRow, newCol) * filter[i][j];
-    }
-  }
-  return sum;
-}
-
  // @brief Implementation of Task Program 1 to produce an edge gray-level image
  //  
  // @param input_filename the name of the input image
@@ -51,7 +40,7 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
     return;
   }
 
-  Image newImage = image;
+  // Image newImage = image;
 
   // Number of rows and columns in the image
   size_t numRows = image.num_rows();
@@ -67,16 +56,47 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
     {-1, -2, -1}
   };
 
-  for (int i = 0; i < numRows; i++) {
-    for (int j = 0; j < numCols; j++) {
-      int newValue1 = applyFilter(image, i, j, filter1);
-      int newValue2 = applyFilter(image, i, j, filter2);
-      newImage.SetPixel(i, j, newValue1*newValue1 + newValue2*newValue2);
-      cout << i <<  " " << j << endl;
+  vector<double> allValues = {};
+
+  for (int i = 1; i < numRows - 1; i++) {
+    for (int j = 1; j < numCols - 1; j++) {
+
+      int newValue1 = 0;
+      int newValue2 = 0;
+
+      for (int x = -1; x < 2; x++) {
+        for (int y = -1; y < 2; y++){
+          int newPixel = image.GetPixel(i + x, j + y);
+          newValue1 += filter1[x + 1][y + 1] * newPixel;
+          newValue2 += filter2[x + 1][y + 1] * newPixel;
+        }
+      }
+
+      double gradient_magnitude = sqrt(newValue1*newValue1 + newValue2*newValue2);
+      allValues.push_back(gradient_magnitude);
     }
   }
 
-  if (!WriteImage(output_filename, newImage)){
+
+  double min_val = *std::min_element(allValues.begin(), allValues.end());
+  double max_val = *std::max_element(allValues.begin(), allValues.end());
+
+  for (double& value : allValues) {
+      value = (value - min_val) / (max_val - min_val);
+  }
+
+
+  for (int i = 1; i < numRows - 1; i++) {
+    for (int j = 1; j < numCols - 1; j++) {
+        double value = allValues[0];
+        allValues.erase(allValues.begin()); // Erase the first element
+
+        image.SetPixel(i, j, value * 255);
+    }
+  }
+
+  // if (!WriteImage(output_filename, newImage)){
+  if (!WriteImage(output_filename, image)){
     cout << "Can't write to file " << output_filename << endl;
   }
 }
