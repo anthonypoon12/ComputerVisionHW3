@@ -16,6 +16,11 @@
 using namespace std;
 using namespace ComputerVisionProjects;
 
+ // @brief Implementation of Bound checking function for a given pixel
+ //  
+ // @param image the Image object
+ // @param row the row coordinate of the target pixel
+ // @param col the column coordinate of the target pixel
 bool isInBounds(Image *image, int row, int col) {
   // Number of rows and columns in the image
   size_t numRows = image->num_rows();
@@ -28,12 +33,23 @@ bool isInBounds(Image *image, int row, int col) {
   return true;
 }
 
+ // @brief Implementation of function that applies convolutional filter to iamge
+ //  
+ // @param image the Image object
+ // @param row the row coordinate of the target pixel
+ // @param col the column coordinate of the target pixel
+ // @param filter the square filter we use to apply filtering
 int applyFilter(Image *image, int row, int col, vector<vector<int>> filter) {
   int sum = 0;
+  // Iterate through each pixel in the filter
   for (int i = 0; i < filter.size(); i++) {
     for (int j = 0; j < filter[i].size(); j++) {
+      // The target pixel is at the center of the filter
+      // This offsets the pixels correctly
       int newRow = row + (i - filter.size() / 2);
       int newCol = col + (j - filter[i].size() / 2);
+
+      // If the pixel that is filtered is not in bounds, we treat it as black
       if (isInBounds(image, newRow, newCol))
         sum += image->GetPixel(newRow, newCol) * filter[i][j];
     }
@@ -57,12 +73,16 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
   // Number of rows and columns in the image
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
-  vector<vector<int>> filter1 = {
+
+  // First derivative in relation to x
+  vector<vector<int>> X_filter = {
     {-1, 0, 1},
     {-2, 0, 2},
     {-1, 0, 1}
   };
-  vector<vector<int>> filter2 = {
+
+  // First derivative in relation to y
+  vector<vector<int>> Y_filter = {
     {1, 2, 1},
     {0, 0, 0},
     {-1, -2, -1}
@@ -70,8 +90,8 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
 
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
-      int gx = applyFilter(&image, i, j, filter1);
-      int gy = applyFilter(&image, i, j, filter2);
+      int gx = applyFilter(&image, i, j, X_filter);
+      int gy = applyFilter(&image, i, j, Y_filter);
       double magnitude = sqrt(gx*gx + gy*gy);
       newImage.SetPixel(i, j, magnitude);
     }
