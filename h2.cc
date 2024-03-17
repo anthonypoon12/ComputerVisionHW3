@@ -1,5 +1,5 @@
 //
-// <YOUR NAME>
+// Anthony
 // Computational Vision Homework 3
 // Program 2
 //
@@ -22,11 +22,31 @@ using namespace ComputerVisionProjects;
  // @param threshold the threshold value
  // @param output_filename the name of the output image
 void ConvertToBinary(const string &input_filename, int threshold, const string &output_filename) {
-  cout << "Converting to Binary Image" << endl;
-  cout << "Input filename: " << input_filename << endl;
-  cout << "Threshold: " << threshold << endl;
-  cout << "Output filename: " << output_filename << endl;
+  Image image;
+  if (!ReadImage(input_filename, &image)) {
+    cout <<"Can't open file " << input_filename << endl;
+    return;
+  }
+
+  // Number of rows and columns in the image
+  size_t rows = image.num_rows();
+  size_t cols = image.num_columns();
+
+  // Sets pixel to black or white depending on its relation to the threshold
+  for (int i = 0; i < rows; i++){
+    for (int j = 0; j < cols; j++){
+      if (image.GetPixel(i, j) < threshold)
+        image.SetPixel(i, j, 0);
+      else
+        image.SetPixel(i, j, 255);
+    }
+  }
+
+  if (!WriteImage(output_filename, image)){
+    cout << "Can't write to file " << output_filename << endl;
+  }
 }
+
 
 int main(int argc, char **argv){  
   if (argc!=4) {
