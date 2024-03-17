@@ -12,21 +12,33 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <algorithm>
 
 using namespace std;
 using namespace ComputerVisionProjects;
 
-bool isInBounds(Image image, int row, int col) {
+bool isInBounds(Image *image, int row, int col) {
   // Number of rows and columns in the image
-  size_t numRows = image.num_rows();
-  size_t numCols = image.num_columns();
+  size_t numRows = image->num_rows();
+  size_t numCols = image->num_columns();
 
   if (row < 0 || row >= numRows)
     return false;
   if (col < 0 || col >= numCols)
     return false;
   return true;
+}
+
+int applyFilter(Image *image, int row, int col, vector<vector<int>> filter) {
+  int sum = 0;
+  for (int i = 0; i < filter.size(); i++) {
+    for (int j = 0; j < filter[i].size(); j++) {
+      int newRow = row + (i - filter.size() / 2);
+      int newCol = col + (j - filter[i].size() / 2);
+      if (isInBounds(image, newRow, newCol))
+        sum += image->GetPixel(newRow, newCol) * filter[i][j];
+    }
+  }
+  return sum;
 }
 
  // @brief Implementation of Task Program 1 to produce an edge gray-level image
@@ -56,26 +68,15 @@ void ComputeEdgeImage(const string &input_filename, const string &output_filenam
     {-1, -2, -1}
   };
 
-  for (int i = 1; i < numRows - 1; i++) {
-    for (int j = 1; j < numCols - 1; j++) {
-
-      int newValue1 = 0;
-      int newValue2 = 0;
-
-      for (int x = -1; x < 2; x++) {
-        for (int y = -1; y < 2; y++){
-          int newPixel = image.GetPixel(i + x, j + y);
-          newValue1 += filter1[x + 1][y + 1] * newPixel;
-          newValue2 += filter2[x + 1][y + 1] * newPixel;
-        }
-      }
-
-      double gradient_magnitude = sqrt(newValue1*newValue1 + newValue2*newValue2);
-      newImage.SetPixel(i, j, gradient_magnitude);
+  for (int i = 0; i < numRows; i++) {
+    for (int j = 0; j < numCols; j++) {
+      int gx = applyFilter(&image, i, j, filter1);
+      int gy = applyFilter(&image, i, j, filter2);
+      double magnitude = sqrt(gx*gx + gy*gy);
+      newImage.SetPixel(i, j, magnitude);
     }
   }
 
-  // if (!WriteImage(output_filename, newImage)){
   if (!WriteImage(output_filename, newImage)){
     cout << "Can't write to file " << output_filename << endl;
   }
