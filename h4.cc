@@ -55,41 +55,29 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   for (int i = 0; i < array2D.size(); i++) {
     for (int j = 0; j < array2D[i].size(); j++) {
       if (array2D[i][j] >= threshold) {
-        double theta = i * M_PI/array2D.size();
-        double rho = j * sqrt(numRows*numRows + numCols*numCols)/array2D[i].size();
+        double theta = (i+1) * M_PI/array2D.size();
+        double rho = (j+1) * sqrt(numRows*numRows + numCols*numCols)/array2D[i].size();
 
-        double x0 = cos(M_PI_2 - theta) * rho;
-        double y0 = sin(M_PI_2 - theta) * rho;
-
-        // assume x is 0
-        double x1 = 0;
-        double y1 = rho/sin(theta);
-        if (x0 < 0) {
-          x0 = 0;
+        double x0 = 0;
+        double y0 = rho/sin(theta);
+        if (sin(theta) == 0 || y0 >= numCols) {
+          y0 = numCols - 1;
         }
         if (y0 < 0) {
           y0 = 0;
         }
+
+        // assume x is 0
+        double y1 = 0;
+        double x1 = rho/cos(theta);
+        if (cos(theta) == 0 || x1 >= numRows) {
+          x1 = numRows - 1;
+        }
         if (x1 < 0) {
           x1 = 0;
         }
-        if (y1 < 0) {
-          y1 = 0;
-        }
-        if (x0 >= numRows) {
-          x0 = numRows-1;
-        }
-        if (y0 >= numCols) {
-          y0 = numCols-1;
-        }
-        if (x1 >= numRows) {
-          x1 = numRows-1;
-        }
-        if (y1 >= numCols) {
-          y1 = numCols-1;
-        }
 
-        cout << threshold << endl;
+
         cout << theta << " " << rho << endl;
         cout << int(x0) << " " << int(y0) << " " << int(x1) << " " << int(y1) << endl;
         DrawLine(int(x0),int(y0),int(x1),int(y1),255, &image);
