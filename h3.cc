@@ -37,7 +37,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   hough_image.AllocateSpaceAndSetSize(arrSize,arrSize);
   hough_image.SetNumberGrayLevels(255);
 
-  // vector<vector<double>> arr(arrSize, vector<double>(arrSize, 0.0));
+  vector<vector<int>> arr(arrSize, vector<int>(arrSize, 0));
   int maximum = 0;
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
@@ -52,13 +52,8 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
         for (int z = 0; z < arrSize; z++) {
           double rho = x*cos(M_PI * z / arrSize) + y*sin(M_PI * z / arrSize);
           rho = rho + arrSize / 2;
-          int newColor = hough_image.GetPixel(z, int(rho));
-          hough_image.SetPixel(z, int(rho), newColor+1);
-          if (maximum < newColor+1){
-            // cout << maximum << " " << newColor << " " << newColor+1 << endl;
-            cout << newColor << endl;
-          }
-          maximum = max(maximum, newColor+1);
+          arr[z][int(rho)]++;
+          maximum = max(maximum, arr[z][int(rho)]);
         }
       }
     }
@@ -70,9 +65,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 
   for (int i = 0; i < houghImgNumRows; i++) {
     for (int j = 0; j < houghImgNumCols; j++) {
-      double color = hough_image.GetPixel(i, j);
-      hough_image.SetPixel(i, j, color);
-      // hough_image.SetPixel(i, j, color * (255.0/maximum));
+      hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
     }
   }
 
