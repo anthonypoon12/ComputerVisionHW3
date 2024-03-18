@@ -16,6 +16,37 @@
 using namespace std;
 using namespace ComputerVisionProjects;
 
+ // @brief Implementation of Bound checking function for a given pixel
+ //  
+ // @param image the Image object
+ // @param row the row coordinate of the target pixel
+ // @param col the column coordinate of the target pixel
+bool isInBounds(Image *image, int row, int col) {
+  // Number of rows and columns in the image
+  size_t numRows = image->num_rows();
+  size_t numCols = image->num_columns();
+
+  if (row < 0 || row >= numRows)
+    return false;
+  if (col < 0 || col >= numCols)
+    return false;
+  return true;
+}
+
+void setSquare(Image *image, int row, int col, int color, int resolution) {
+  for (int i = -1 * resolution/2; i < resolution/2; i++) {
+    for (int j = -1 * resolution/2; j < resolution/2; j++) {
+      
+      if (isInBounds(image, row + i, col + j)){
+        int currentColor = image->GetPixel(row + i, col + j);
+        if (currentColor < color) {
+          image->SetPixel(row+i, col+j, color);
+        }
+      }
+    }
+  }
+}
+
 // @brief Computes Hough Transform
 // @param input_filename the filename of the input binary edge image
 // @param output_hough_image_filename the name of the output hough image (gray scale pgm)
@@ -37,6 +68,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 
   vector<vector<int>> arr(thetaWidth, vector<int>(rhoRange, 0));
   int maximum = 0;
+
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
       double color = image.GetPixel(i, j);
@@ -48,7 +80,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
         int y = j - numCols / 2;
         
         for (int z = 0; z < thetaWidth; z++) {
-          double rho = x*cos(M_PI * z / thetaWidth) + y*sin(M_PI * z / thetaWidth);
+          double rho = x*cos(M_PI * (z+1) / thetaWidth) + y*sin(M_PI * (z+1) / thetaWidth);
           rho = rho + rhoRange / 2;
           arr[z][int(rho)]++;
           maximum = max(maximum, arr[z][int(rho)]);
@@ -64,7 +96,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < rhoRange; j++) {
-      hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
+      setSquare(&hough_image, i, j, arr[i][j] * 255/maximum, 10);
     }
   }
 
