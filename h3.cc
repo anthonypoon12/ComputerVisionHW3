@@ -34,20 +34,6 @@ bool isInBounds(Image *image, int row, int col) {
   return true;
 }
 
-void setSquare(Image *image, int row, int col, int color, int resolution) {
-  for (int i = -1 * resolution/2; i < resolution/2; i++) {
-    for (int j = -1 * resolution/2; j < resolution/2; j++) {
-      
-      if (isInBounds(image, row + i, col + j)){
-        int currentColor = image->GetPixel(row + i, col + j);
-        if (currentColor < color) {
-          image->SetPixel(row+i, col+j, color);
-        }
-      }
-    }
-  }
-}
-
 // @brief Computes Hough Transform
 // @param input_filename the filename of the input binary edge image
 // @param output_hough_image_filename the name of the output hough image (gray scale pgm)
@@ -64,11 +50,12 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
   
+  const double thetaResolution = 1.0;
+  double rhoResolution = 0.5;
+
   const int rhoRange = sqrt(numRows*numRows + numCols*numCols);
-  // const int thetaWidth = rhoRange;
-  const int thetaWidth = 181;
-  // const int arrWidth = rhoRange;
-  const int arrWidth = 1600;
+  const int thetaWidth = 180/thetaResolution;
+  const int arrWidth = rhoRange/rhoResolution;
 
   vector<vector<int>> arr(thetaWidth, vector<int>(arrWidth, 0));
   int maximum = 0;
@@ -95,14 +82,9 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   hough_image.AllocateSpaceAndSetSize(thetaWidth,arrWidth);
   hough_image.SetNumberGrayLevels(255);
 
-  vector<vector<int>> newArr(thetaWidth/3, vector<int>(rhoRange/3, 0));
-
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < arrWidth; j++) {
-      setSquare(&hough_image, i, j, arr[i][j] * 255/maximum, 3);
-      // hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
-      if (i/3 < newArr.size() && j/3 < newArr[0].size())
-        newArr[i/3][j/3] = hough_image.GetPixel(i, j);
+      hough_image.SetPixel(i, j, arr[i][j]);
     }
   }
 
@@ -112,9 +94,9 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 ofstream file(output_voting_array_filename);
 if (file.is_open())
   {
-    for(int i = 0; i < newArr.size(); i++){
-      for (int j = 0; j < newArr[i].size(); j++) {
-        file << newArr[i][j] << " " ;
+    for(int i = 0; i < arr.size(); i++){
+      for (int j = 0; j < arr[i].size(); j++) {
+        file << arr[i][j] << " " ;
       }
       file << "\n";
     }
