@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 using namespace ComputerVisionProjects;
@@ -80,7 +81,8 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
         int y = j - numCols / 2;
         
         for (int z = 0; z < thetaWidth; z++) {
-          double rho = x*cos(M_PI * (z+1) / thetaWidth) + y*sin(M_PI * (z+1) / thetaWidth);
+          double theta = M_PI * z / thetaWidth;
+          double rho = x*cos(theta) + y*sin(theta);
           rho = rho + rhoRange / 2;
           arr[z][int(rho)]++;
           maximum = max(maximum, arr[z][int(rho)]);
@@ -94,16 +96,32 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   hough_image.AllocateSpaceAndSetSize(thetaWidth,rhoRange);
   hough_image.SetNumberGrayLevels(255);
 
+  vector<vector<int>> newArr(thetaWidth/3, vector<int>(rhoRange/3, 0));
+
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < rhoRange; j++) {
       setSquare(&hough_image, i, j, arr[i][j] * 255/maximum, 10);
+      if (i/3 < newArr.size() && j/3 < newArr[0].size())
+        newArr[i/3][j/3] = hough_image.GetPixel(i, j);
     }
   }
 
   if (!WriteImage(output_hough_image_filename, hough_image)){
     cout << "Can't write to file " << output_hough_image_filename << endl;
   }
+ofstream file(output_voting_array_filename);
+if (file.is_open())
+  {
+    for(int i = 0; i < newArr.size(); i++){
+      for (int j = 0; j < newArr[i].size(); j++) {
+        file << newArr[i][j] << " " ;
+      }
+      file << "\n";
+    }
+    file.close();
+  }
 }
+
 
 int main(int argc, char **argv){
   
