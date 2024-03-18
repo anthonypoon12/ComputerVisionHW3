@@ -32,12 +32,10 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
   
-  const int arrSize = sqrt(numRows*numRows + numCols*numCols);
-  Image hough_image;
-  hough_image.AllocateSpaceAndSetSize(arrSize,arrSize);
-  hough_image.SetNumberGrayLevels(255);
+  const int rhoRange = sqrt(numRows*numRows + numCols*numCols);
+  const int thetaWidth = rhoRange;
 
-  vector<vector<int>> arr(arrSize, vector<int>(arrSize, 0));
+  vector<vector<int>> arr(thetaWidth, vector<int>(rhoRange, 0));
   int maximum = 0;
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
@@ -49,9 +47,9 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
         int x = i - numRows / 2;
         int y = j - numCols / 2;
         
-        for (int z = 0; z < arrSize; z++) {
-          double rho = x*cos(M_PI * z / arrSize) + y*sin(M_PI * z / arrSize);
-          rho = rho + arrSize / 2;
+        for (int z = 0; z < thetaWidth; z++) {
+          double rho = x*cos(M_PI * z / thetaWidth) + y*sin(M_PI * z / thetaWidth);
+          rho = rho + rhoRange / 2;
           arr[z][int(rho)]++;
           maximum = max(maximum, arr[z][int(rho)]);
         }
@@ -59,12 +57,13 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
     }
   }
 
-  // Number of rows and columns in the hough_image
-  size_t houghImgNumRows = hough_image.num_rows();
-  size_t houghImgNumCols = hough_image.num_columns();
 
-  for (int i = 0; i < houghImgNumRows; i++) {
-    for (int j = 0; j < houghImgNumCols; j++) {
+  Image hough_image;
+  hough_image.AllocateSpaceAndSetSize(thetaWidth,rhoRange);
+  hough_image.SetNumberGrayLevels(255);
+
+  for (int i = 0; i < thetaWidth; i++) {
+    for (int j = 0; j < rhoRange; j++) {
       hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
     }
   }
