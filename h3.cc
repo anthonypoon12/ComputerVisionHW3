@@ -84,7 +84,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < arrWidth; j++) {
-      hough_image.SetPixel(i, j, arr[i][j]);
+      hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
     }
   }
 
