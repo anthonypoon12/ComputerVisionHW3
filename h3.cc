@@ -64,7 +64,7 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
       double color = image.GetPixel(i, j);
       if (color > 0) {
         for (int z = 0; z < thetaWidth; z++) {
-          double theta = M_PI * z / thetaWidth;
+          double theta = M_PI * (z+1) / thetaWidth;
           double rho = i*cos(theta) + j*sin(theta);
           int k = int(rho/rhoRange * arrWidth);
           if (k >= 0 && k < arrWidth){

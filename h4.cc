@@ -113,14 +113,7 @@ void secondPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabel
       int label = sets.find(array2D[i][j]);
 
       if (label != 0){
-        
-        // Check if label has been seen before
-        if (labelCounts[label] == 0){
-          labelCounts[label] = labelCounter;
-          labelCounter++;
-        }
-
-        array2D[i][j] = labelCounts[label];
+        array2D[i][j] = label;
       }
     }
   }
