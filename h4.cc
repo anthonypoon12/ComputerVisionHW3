@@ -207,7 +207,7 @@ vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D, vector<vecto
 void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, size_t numRows, size_t numCols, ComputerVisionProjects::Image &image)
 {
   vector<double> points;
-  double theta = i * M_PI / array2D.size();
+  double theta = (i+1) * M_PI / array2D.size();
   double rho = j * sqrt(numRows * numRows + numCols * numCols) / array2D[i].size();
 
   double x = 0;
@@ -246,11 +246,7 @@ void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, s
     points.push_back(y);
   }
 
-  // cout << rho << " " << theta << endl;
-  // cout << int(points[0])<< "," << int(points[1]) << " " << int(points[2]) << "," << int(points[3]) << endl;
-  // cout << endl;
-  DrawLine(int(points[0]), int(points[1]), int(points[2]), int(points[3]), 255, &image);
-}
+  DrawLine(points[0], points[1], points[2], points[3], 255, &image);
 // @brief Computes and draws lines from Hough transform
 // @param input_filename the filename of the input original image
 // @param input_voting_array_filename the filename of the input hough voting array (from h3)
@@ -298,6 +294,7 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   PerformSequentialLabeling(array2D);
 
   vector<vector<int>> points = ComputeProperties(array2D, originalArr);
+
   for (vector<int> point: points) {
     drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
   }
