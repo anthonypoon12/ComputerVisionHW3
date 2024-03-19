@@ -14,6 +14,7 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
+#include "h4.h"
 
 using namespace std;
 using namespace ComputerVisionProjects;
@@ -52,60 +53,10 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
 
-  vector<double> points;
+  // Make the image binary
   for (int i = 0; i < array2D.size(); i++) {
     for (int j = 0; j < array2D[i].size(); j++) {
-      if (array2D[i][j] >= threshold) {
-        double theta = i * M_PI/array2D.size();
-        double rho = j * sqrt(numRows*numRows + numCols*numCols)/array2D[i].size();
-
-        double x0 = 0;
-        double y0 = (rho)/sin(theta);
-        if (sin(theta) == 0) {
-          y0 = numCols - 1;
-        }
-
-        if (y0 >= 0 && y0 < numCols){
-          points.push_back(x0);
-          points.push_back(y0);
-        }
-
-        double y1 = 0;
-        double x1 = (rho)/cos(theta);
-        if (cos(theta) == 0) {
-          x1 = numRows - 1;
-        }
-
-        if (x1 >= 0 && x1 < numRows){
-          points.push_back(x1);
-          points.push_back(y1);
-        }
-
-        x0 = numRows - 1;
-        y0 = (rho-(x0*cos(theta)))/sin(theta);
-        if (sin(theta) == 0) {
-          y0 = numCols - 1;
-        }
-
-        if (y0 >= 0 && y0 < numCols){
-          points.push_back(x0);
-          points.push_back(y0);
-        }
-
-        y1 = numCols-1;
-        x1 = (rho-(y1*sin(theta)))/cos(theta);
-        if (cos(theta) == 0) {
-          x1 = numRows - 1;
-        }
-
-        if (x1 >= 0 && x1 < numRows){
-          points.push_back(x1);
-          points.push_back(y1);
-        }
-
-        DrawLine(int(points[0]),int(points[1]),int(points[2]),int(points[3]),255, &image);
-        points.clear();
-      }
+      array2D[i][j] = array2D[i][j] >= threshold ? 255 : 0;
     }
   }
 
@@ -114,6 +65,66 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   }
 }
 
+void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, size_t numRows, size_t numCols, ComputerVisionProjects::Image &image)
+{
+  vector<double> points;
+  double theta = i * M_PI / array2D.size();
+  double rho = j * sqrt(numRows * numRows + numCols * numCols) / array2D[i].size();
+
+  double x0 = 0;
+  double y0 = (rho) / sin(theta);
+  if (sin(theta) == 0)
+  {
+    y0 = numCols - 1;
+  }
+
+  if (y0 >= 0 && y0 < numCols)
+  {
+    points.push_back(x0);
+    points.push_back(y0);
+  }
+
+  double y1 = 0;
+  double x1 = (rho) / cos(theta);
+  if (cos(theta) == 0)
+  {
+    x1 = numRows - 1;
+  }
+
+  if (x1 >= 0 && x1 < numRows)
+  {
+    points.push_back(x1);
+    points.push_back(y1);
+  }
+
+  x0 = numRows - 1;
+  y0 = (rho - (x0 * cos(theta))) / sin(theta);
+  if (sin(theta) == 0)
+  {
+    y0 = numCols - 1;
+  }
+
+  if (y0 >= 0 && y0 < numCols)
+  {
+    points.push_back(x0);
+    points.push_back(y0);
+  }
+
+  y1 = numCols - 1;
+  x1 = (rho - (y1 * sin(theta))) / cos(theta);
+  if (cos(theta) == 0)
+  {
+    x1 = numRows - 1;
+  }
+
+  if (x1 >= 0 && x1 < numRows)
+  {
+    points.push_back(x1);
+    points.push_back(y1);
+  }
+
+  DrawLine(int(points[0]), int(points[1]), int(points[2]), int(points[3]), 255, &image);
+}
 int main(int argc, char **argv){
   
   if (argc!=5) {
