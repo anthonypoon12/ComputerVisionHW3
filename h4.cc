@@ -21,6 +21,11 @@
 using namespace std;
 using namespace ComputerVisionProjects;
 
+ // @brief Implementation of Bound checking function for a given pixel
+ //  
+ // @param array2D 2d array
+ // @param row the row index of the target cell
+ // @param col the column index of the target cell
 bool isInBounds(vector<vector<int>> array2D, int row, int col){
   // number of rows and columns
   size_t max_row = array2D.size();
@@ -32,7 +37,7 @@ bool isInBounds(vector<vector<int>> array2D, int row, int col){
   return true;
 }
 
-void firstPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
+void sequentialLabelingFirstPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
   // number of rows and columns
   size_t rows = array2D.size();
   size_t cols = array2D[0].size();
@@ -98,7 +103,7 @@ void firstPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels
   }
 }
 
-void secondPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
+void sequentialLabelingSecondPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
   // number of rows and columns
   size_t rows = array2D.size();
   size_t cols = array2D[0].size();
@@ -129,9 +134,9 @@ void PerformSequentialLabeling(vector<vector<int>> &array2D) {
   int numberOfLabels = 0;
   DisjSets sets = DisjSets(rows * cols);
 
-  firstPass(array2D, sets, numberOfLabels);
+  sequentialLabelingFirstPass(array2D, sets, numberOfLabels);
 
-  secondPass(array2D, sets, numberOfLabels);
+  sequentialLabelingSecondPass(array2D, sets, numberOfLabels);
 
 }
 
