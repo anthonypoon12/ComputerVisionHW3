@@ -158,9 +158,6 @@ void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector
         labelMap[pixelColor][0] += i; // sum of row value
         labelMap[pixelColor][1] += j; // sum of column value
         labelMap[pixelColor][2]++; // area
-        labelMap[pixelColor][5] += i * i; // a_prime
-        labelMap[pixelColor][6] += 2 * i * j; // b_prime
-        labelMap[pixelColor][7] += j * j; // c_prime
       }
     }
   }
@@ -179,7 +176,8 @@ void findLabelInfo(unordered_map<int, vector<double>> &labelMap) {
   }
 }
 
-void ComputeProperties(vector<vector<int>> &array2D) {
+vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D) {
+  vector<vector<int>> outputs;
 // number of rows and columns
   size_t rows = array2D.size();
   size_t cols = array2D[0].size();
@@ -195,12 +193,17 @@ void ComputeProperties(vector<vector<int>> &array2D) {
 
   for (auto pair : labelMap) {
     int labelNumber = pair.first;
+    vector<int> coordinates;
     vector<double> labelInfo = pair.second;
 
     double area = labelInfo[2];
     double x = labelInfo[3];
     double y = labelInfo[4];
+    coordinates.push_back(x);
+    coordinates.push_back(y);
+    outputs.push_back(coordinates);
   }
+  return outputs;
 }
 
 // @brief Computes and draws lines from Hough transform
@@ -245,6 +248,11 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   }
 
   PerformSequentialLabeling(array2D);
+
+  vector<vector<int>> points = ComputeProperties(array2D);
+  for (vector<int> point: points) {
+    drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
+  }
 
   if (!WriteImage(output_gray_level_line_filename, image)){
     cout << "Can't write to file " << output_gray_level_line_filename << endl;
