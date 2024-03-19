@@ -58,7 +58,6 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   const int arrWidth = rhoRange/rhoResolution;
 
   vector<vector<int>> arr(thetaWidth, vector<int>(arrWidth, 0));
-  int maximum = 0;
 
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
@@ -70,7 +69,6 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
           int k = int(rho/rhoRange * arrWidth);
           if (k >= 0 && k < arrWidth){
             arr[z][k]++;
-            maximum = max(maximum, arr[z][k]);
           }
         }
       }
@@ -84,7 +82,9 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
 
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < arrWidth; j++) {
-      hough_image.SetPixel(i, j, arr[i][j] * 255/maximum);
+      hough_image.SetPixel(i, j, arr[i][j]);
+      if (arr[i][j] > 255)
+        hough_image.SetPixel(i, j, 255);
     }
   }
 
