@@ -5,6 +5,7 @@
 //
 
 #include "image.h"
+#include "DisjSets.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -14,10 +15,133 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
+#include <unordered_map>
 #include "h4.h"
 
 using namespace std;
 using namespace ComputerVisionProjects;
+
+bool isInBounds(vector<vector<int>> array2D, int row, int col){
+  // number of rows and columns
+  size_t max_row = array2D.size();
+  size_t max_col = array2D[0].size();
+  if (row < 0 || row >= max_row)
+    return false;
+  if (col < 0 || col >= max_col)
+    return false;
+  return true;
+}
+
+void firstPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
+  // number of rows and columns
+  size_t rows = array2D.size();
+  size_t cols = array2D[0].size();
+
+  // Keeps track of "new" object that we encounter
+  int labelNumber = 1;
+
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+
+      // Current pixel
+      int a = array2D[i][j];
+
+      // If the pixel is not the background
+      if (a != 0) {
+        // Label that we will assign to current pixel
+        int newLabel;
+
+        //  Check 3 other neighbors in 2x2 square
+        int b = isInBounds(array2D, i, j - 1) ? array2D[i][j - 1] : 0;
+        int c = isInBounds(array2D, i - 1, j) ? array2D[i - 1][j] : 0;
+        int d = isInBounds(array2D, i - 1, j - 1) ? array2D[i - 1][j - 1] : 0;
+      
+        // If neighbors are all background, we have a new label
+        if (b == 0 && c == 0 && d == 0) {
+          newLabel = labelNumber;
+          labelNumber++;
+          numberOfLabels++;
+        }
+
+        else {
+          // If diagonal is an object, current pixel is same object
+          if (d != 0) {
+            newLabel = d;
+          }
+
+          else {
+            // If both b and c are objects, pick arbitrarily and union them
+            if (b != 0 && c != 0) {
+              int root1 = sets.find(b);
+              int root2 = sets.find(c);
+              if (root1 != root2){
+                sets.unionSets(root1, root2);
+                numberOfLabels--;
+              }
+              newLabel = b;
+            }
+
+            // If there is only one non-zero neighbor, take that value
+            else if (b != 0) {
+              newLabel = b;
+            }
+            else {
+              newLabel = c;
+            }
+          }
+        }
+      
+        // Record label in pixel of image
+        array2D[i][j] = newLabel;
+      }
+    }
+  }
+}
+
+void secondPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
+  // number of rows and columns
+  size_t rows = array2D.size();
+  size_t cols = array2D[0].size();
+
+  // Assign integer starting from 1 to each object label for coloring
+  unordered_map<int, int> labelCounts = {};
+  int labelCounter = 1;
+
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+
+      // Finds true label of pixel in equivalency table
+      int label = sets.find(array2D[i][j]);
+
+      if (label != 0){
+        
+        // Check if label has been seen before
+        if (labelCounts[label] == 0){
+          labelCounts[label] = labelCounter;
+          labelCounter++;
+        }
+
+        array2D[i][j] = labelCounts[label];
+      }
+    }
+  }
+}
+
+void PerformSequentialLabeling(vector<vector<int>> &array2D) {
+
+// number of rows and columns
+  size_t rows = array2D.size();
+  size_t cols = array2D[0].size();
+
+  int numberOfLabels = 0;
+  DisjSets sets = DisjSets(rows * cols);
+
+  firstPass(array2D, sets, numberOfLabels);
+
+  secondPass(array2D, sets, numberOfLabels);
+
+}
+
 
 // @brief Computes and draws lines from Hough transform
 // @param input_filename the filename of the input original image
@@ -59,6 +183,16 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
       array2D[i][j] = array2D[i][j] >= threshold ? 255 : 0;
     }
   }
+
+  PerformSequentialLabeling(array2D);
+
+  for (int i = 0; i < array2D.size(); i++) {
+    for (int j = 0; j < array2D[i].size(); j++) {
+      if (array2D[i][j] != 0)
+      cout << array2D[i][j];
+    }
+  }
+
 
   if (!WriteImage(output_gray_level_line_filename, image)){
     cout << "Can't write to file " << output_gray_level_line_filename << endl;
