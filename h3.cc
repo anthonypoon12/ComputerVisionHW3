@@ -50,23 +50,30 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
   
+  // Resolution for scaling of rho,theta coordinates
   const double thetaResolution = 1.0;
   double rhoResolution = 0.5;
-
   const int rhoRange = sqrt(numRows*numRows + numCols*numCols);
   const int thetaWidth = 180/thetaResolution;
   const int arrWidth = rhoRange/rhoResolution;
 
+  // creating 2d array with designated sizes
+  // range should be 
+  // X: 0 to 180
+  // Y: 0 to length of diagonal
   vector<vector<int>> arr(thetaWidth, vector<int>(arrWidth, 0));
 
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
-      double color = image.GetPixel(i, j);
-      if (color > 0) {
+      if (image.GetPixel(i, j) > 0) {
+
+        // running through line function
         for (int z = 0; z < thetaWidth; z++) {
           double theta = M_PI * (z+1) / thetaWidth;
           double rho = i*cos(theta) + j*sin(theta);
           int k = int(rho/rhoRange * arrWidth);
+
+          // rho being out of bounds means that it is not within our image
           if (k >= 0 && k < arrWidth){
             arr[z][k]++;
           }
@@ -83,6 +90,8 @@ void ComputeHoughTransform(const string &input_filename, const string & output_h
   for (int i = 0; i < thetaWidth; i++) {
     for (int j = 0; j < arrWidth; j++) {
       hough_image.SetPixel(i, j, arr[i][j]);
+      
+      // Cap the pixel to 255
       if (arr[i][j] > 255)
         hough_image.SetPixel(i, j, 255);
     }
