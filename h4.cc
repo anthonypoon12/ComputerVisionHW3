@@ -142,6 +142,66 @@ void PerformSequentialLabeling(vector<vector<int>> &array2D) {
 
 }
 
+void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector<double>> &labelMap) {
+  // number of rows and columns
+  size_t rows = array2D.size();
+  size_t cols = array2D[0].size();
+
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      int pixelColor = array2D[i][j];
+
+      if (pixelColor != 0){
+        if (labelMap.find(pixelColor) == labelMap.end()) {
+          labelMap[pixelColor] = vector<double>(5);
+        }
+        labelMap[pixelColor][0] += i; // sum of row value
+        labelMap[pixelColor][1] += j; // sum of column value
+        labelMap[pixelColor][2]++; // area
+        labelMap[pixelColor][5] += i * i; // a_prime
+        labelMap[pixelColor][6] += 2 * i * j; // b_prime
+        labelMap[pixelColor][7] += j * j; // c_prime
+      }
+    }
+  }
+}
+
+void findLabelInfo(unordered_map<int, vector<double>> &labelMap) {
+  for (auto pair : labelMap) {
+    int labelNumber = pair.first;
+    double rowSum = labelMap[labelNumber][0];
+    double colSum = labelMap[labelNumber][1];
+    double area = labelMap[labelNumber][2];
+    double centerRow = rowSum/area;
+    double centerCol = colSum/area;
+    labelMap[labelNumber][3] = centerRow; // row center
+    labelMap[labelNumber][4] = centerCol; // col center
+  }
+}
+
+void ComputeProperties(vector<vector<int>> &array2D) {
+// number of rows and columns
+  size_t rows = array2D.size();
+  size_t cols = array2D[0].size();
+
+  // Counter starts at 1 so we can use 0 to check if we have seen the label
+  unordered_map<int, vector<double>> labelMap = {};
+
+  // Assembles sums and other info through scanning through each pixel of image
+  populateSumsAndArea(array2D, labelMap);
+
+  // Organize additional computation results  into vectors for easy access
+  findLabelInfo(labelMap);
+
+  for (auto pair : labelMap) {
+    int labelNumber = pair.first;
+    vector<double> labelInfo = pair.second;
+
+    double area = labelInfo[2];
+    double x = labelInfo[3];
+    double y = labelInfo[4];
+  }
+}
 
 // @brief Computes and draws lines from Hough transform
 // @param input_filename the filename of the input original image
