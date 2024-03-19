@@ -16,6 +16,7 @@
 #include <sstream>
 #include <cmath>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 using namespace ComputerVisionProjects;
@@ -134,7 +135,7 @@ void PerformSequentialLabeling(vector<vector<int>> &array2D) {
 
 }
 
-void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector<double>> &labelMap) {
+void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector<double>> &labelMap,vector<vector<int>> &originalArr) {
   // number of rows and columns
   size_t rows = array2D.size();
   size_t cols = array2D[0].size();
@@ -147,9 +148,9 @@ void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector
         if (labelMap.find(pixelColor) == labelMap.end()) {
           labelMap[pixelColor] = vector<double>(5);
         }
-        labelMap[pixelColor][0] += i; // sum of row value
-        labelMap[pixelColor][1] += j; // sum of column value
-        labelMap[pixelColor][2]++; // area
+        labelMap[pixelColor][0] += double(i)*originalArr[i][j]; // sum of row value
+        labelMap[pixelColor][1] += double(j)*originalArr[i][j]; // sum of column value
+        labelMap[pixelColor][2]+=originalArr[i][j]; // area
       }
     }
   }
@@ -168,7 +169,7 @@ void findLabelInfo(unordered_map<int, vector<double>> &labelMap) {
   }
 }
 
-vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D) {
+vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D, vector<vector<int>> &originalArr) {
   vector<vector<int>> outputs;
 // number of rows and columns
   size_t rows = array2D.size();
@@ -178,7 +179,7 @@ vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D) {
   unordered_map<int, vector<double>> labelMap = {};
 
   // Assembles sums and other info through scanning through each pixel of image
-  populateSumsAndArea(array2D, labelMap);
+  populateSumsAndArea(array2D, labelMap, originalArr);
 
   // Organize additional computation results  into vectors for easy access
   findLabelInfo(labelMap);
@@ -292,16 +293,19 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   size_t numRows = image.num_rows();
   size_t numCols = image.num_columns();
 
+  vector<vector<int>> originalArr = array2D;
+  
   // Make the image binary
   for (int i = 0; i < array2D.size(); i++) {
     for (int j = 0; j < array2D[i].size(); j++) {
-      array2D[i][j] = array2D[i][j] >= threshold ? 255 : 0;
+      if (array2D[i][j] <= threshold)
+        array2D[i][j] = 0;
     }
   }
 
   PerformSequentialLabeling(array2D);
 
-  vector<vector<int>> points = ComputeProperties(array2D);
+  vector<vector<int>> points = ComputeProperties(array2D, originalArr);
   for (vector<int> point: points) {
     drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
   }
