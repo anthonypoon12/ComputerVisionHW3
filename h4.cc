@@ -186,14 +186,6 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
 
   PerformSequentialLabeling(array2D);
 
-  for (int i = 0; i < array2D.size(); i++) {
-    for (int j = 0; j < array2D[i].size(); j++) {
-      if (array2D[i][j] != 0)
-      cout << array2D[i][j];
-    }
-  }
-
-
   if (!WriteImage(output_gray_level_line_filename, image)){
     cout << "Can't write to file " << output_gray_level_line_filename << endl;
   }
