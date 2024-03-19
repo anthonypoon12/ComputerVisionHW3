@@ -11,3 +11,5 @@ make all
 ./h2 2output.pgm 40 2output2.pgm
 ./h3 2output2.pgm 2output3.pgm b.txt
 ./h4 InputImagesHomework3/hough_simple_2.pgm b.txt 120 2output4.pgm
+
+make clean
