@@ -37,6 +37,10 @@ bool isInBounds(vector<vector<int>> array2D, int row, int col){
   return true;
 }
 
+// @brief Implementation of first pass through array, assigning labels to cells and building the equivalency table
+// @param array2D the 2d array
+// @param sets the equivalency table (disjoint sets)
+// @param numberOfLabels the total number of labels in the image
 void sequentialLabelingFirstPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
   // number of rows and columns
   size_t rows = array2D.size();
@@ -103,6 +107,10 @@ void sequentialLabelingFirstPass(vector<vector<int>> &array2D, DisjSets &sets, i
   }
 }
 
+// @brief Implementation of second pass through array, assigning new label based on the equivalency table
+// @param array2D the 2d array
+// @param sets the equivalency table (disjoint sets)
+// @param numberOfLabels the total number of labels in the image
 void sequentialLabelingSecondPass(vector<vector<int>> &array2D, DisjSets &sets, int &numberOfLabels) {
   // number of rows and columns
   size_t rows = array2D.size();
@@ -125,6 +133,8 @@ void sequentialLabelingSecondPass(vector<vector<int>> &array2D, DisjSets &sets, 
   }
 }
 
+// @brief Implementation of sequential labeling algorithm
+// @param array2D the 2D array
 void PerformSequentialLabeling(vector<vector<int>> &array2D) {
 
 // number of rows and columns
@@ -140,6 +150,10 @@ void PerformSequentialLabeling(vector<vector<int>> &array2D) {
 
 }
 
+// @brief Finds weighted sums of rows, columns, and total weights. Updates a hashmap for each label
+// @param array2D the 2d array
+// @param labelMap a hashmap to organize information for each label
+// @param originalArr a 2d array with the original votes
 void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector<double>> &labelMap,vector<vector<int>> &originalArr) {
   // number of rows and columns
   size_t rows = array2D.size();
@@ -161,6 +175,8 @@ void populateSumsAndArea(vector<vector<int>> &array2D, unordered_map<int, vector
   }
 }
 
+// @brief Finds the center of each object and updates hashmap
+// @param labelMap a hashmap to organize information for each label
 void findLabelInfo(unordered_map<int, vector<double>> &labelMap) {
   for (auto pair : labelMap) {
     int labelNumber = pair.first;
@@ -174,6 +190,9 @@ void findLabelInfo(unordered_map<int, vector<double>> &labelMap) {
   }
 }
 
+// @brief Compute object center
+// @param array2D the 2d array
+// @param originalArr the 2d array with original vote counts
 vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D, vector<vector<int>> &originalArr) {
   vector<vector<int>> outputs;
 // number of rows and columns
@@ -204,8 +223,12 @@ vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D, vector<vecto
   return outputs;
 }
 
-void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, size_t numRows, size_t numCols, ComputerVisionProjects::Image &image)
-{
+// @brief Draws a line given the indices of the point in the 2d array
+// @param array2D the 2d array
+// @param i the row value of 2d array
+// @param j the col value of 2d array
+// @param image the Image object that we are modifying
+void drawLineForArrCoord(std::vector<std::vector<int>> &array2D, int i, int j, size_t numRows, size_t numCols, Image &image) {
   vector<double> points;
   double theta = (i+1) * M_PI / array2D.size();
   double rho = j * sqrt(numRows * numRows + numCols * numCols) / array2D[i].size();
@@ -246,7 +269,13 @@ void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, s
     points.push_back(y);
   }
 
+  // cout << rho << " " << theta << endl;
+  // cout << points[0] << " " << points[1] << " " << points[2] << " " << points[3] << endl;
+  // cout << endl;
+  // DrawLine(int(points[0]), int(points[1]), int(points[2]), int(points[3]), 255, &image);
   DrawLine(points[0], points[1], points[2], points[3], 255, &image);
+}
+
 // @brief Computes and draws lines from Hough transform
 // @param input_filename the filename of the input original image
 // @param input_voting_array_filename the filename of the input hough voting array (from h3)
@@ -296,7 +325,7 @@ void ComputeAndDrawLinesFromHough(const string &input_filename, const string &in
   vector<vector<int>> points = ComputeProperties(array2D, originalArr);
 
   for (vector<int> point: points) {
-    drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
+    drawLineForArrCoord(array2D, point[0], point[1], numRows, numCols, image);
   }
 
   if (!WriteImage(output_gray_level_line_filename, image)){
