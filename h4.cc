@@ -16,7 +16,6 @@
 #include <sstream>
 #include <cmath>
 #include <unordered_map>
-#include "h4.h"
 
 using namespace std;
 using namespace ComputerVisionProjects;
@@ -206,59 +205,6 @@ vector<vector<int>> ComputeProperties(vector<vector<int>> &array2D) {
   return outputs;
 }
 
-// @brief Computes and draws lines from Hough transform
-// @param input_filename the filename of the input original image
-// @param input_voting_array_filename the filename of the input hough voting array (from h3)
-// @param threshold is the threshold for detection of peaks in hough voting array
-// @param output_gray_level_line_filename the filename of the output line image
-void ComputeAndDrawLinesFromHough(const string &input_filename, const string &input_voting_array_filename, int threshold, const string &output_gray_level_line_filename) {
-  Image image;
-  if (!ReadImage(input_filename, &image)) {
-    cout <<"Can't open file " << input_filename << endl;
-    return;
-  }
-
-  ifstream inputFile(input_voting_array_filename);
-  if (!inputFile) {
-        cerr << "Error opening file." << endl;
-        return;
-  }
-
-  vector<vector<int>> array2D;
-
-  string line;
-  while (getline(inputFile, line)) {
-    istringstream iss(line);
-    int num;
-    vector<int> row;
-    while (iss >> num) {
-        row.push_back(num);
-    }
-    array2D.push_back(row);
-  }
-  // Number of rows and columns in the image
-  size_t numRows = image.num_rows();
-  size_t numCols = image.num_columns();
-
-  // Make the image binary
-  for (int i = 0; i < array2D.size(); i++) {
-    for (int j = 0; j < array2D[i].size(); j++) {
-      array2D[i][j] = array2D[i][j] >= threshold ? 255 : 0;
-    }
-  }
-
-  PerformSequentialLabeling(array2D);
-
-  vector<vector<int>> points = ComputeProperties(array2D);
-  for (vector<int> point: points) {
-    drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
-  }
-
-  if (!WriteImage(output_gray_level_line_filename, image)){
-    cout << "Can't write to file " << output_gray_level_line_filename << endl;
-  }
-}
-
 void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, size_t numRows, size_t numCols, ComputerVisionProjects::Image &image)
 {
   vector<double> points;
@@ -319,6 +265,59 @@ void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, s
 
   DrawLine(int(points[0]), int(points[1]), int(points[2]), int(points[3]), 255, &image);
 }
+// @brief Computes and draws lines from Hough transform
+// @param input_filename the filename of the input original image
+// @param input_voting_array_filename the filename of the input hough voting array (from h3)
+// @param threshold is the threshold for detection of peaks in hough voting array
+// @param output_gray_level_line_filename the filename of the output line image
+void ComputeAndDrawLinesFromHough(const string &input_filename, const string &input_voting_array_filename, int threshold, const string &output_gray_level_line_filename) {
+  Image image;
+  if (!ReadImage(input_filename, &image)) {
+    cout <<"Can't open file " << input_filename << endl;
+    return;
+  }
+
+  ifstream inputFile(input_voting_array_filename);
+  if (!inputFile) {
+        cerr << "Error opening file." << endl;
+        return;
+  }
+
+  vector<vector<int>> array2D;
+
+  string line;
+  while (getline(inputFile, line)) {
+    istringstream iss(line);
+    int num;
+    vector<int> row;
+    while (iss >> num) {
+        row.push_back(num);
+    }
+    array2D.push_back(row);
+  }
+  // Number of rows and columns in the image
+  size_t numRows = image.num_rows();
+  size_t numCols = image.num_columns();
+
+  // Make the image binary
+  for (int i = 0; i < array2D.size(); i++) {
+    for (int j = 0; j < array2D[i].size(); j++) {
+      array2D[i][j] = array2D[i][j] >= threshold ? 255 : 0;
+    }
+  }
+
+  PerformSequentialLabeling(array2D);
+
+  vector<vector<int>> points = ComputeProperties(array2D);
+  for (vector<int> point: points) {
+    drawLineForArrCoord(point[0], array2D, point[1], numRows, numCols, image);
+  }
+
+  if (!WriteImage(output_gray_level_line_filename, image)){
+    cout << "Can't write to file " << output_gray_level_line_filename << endl;
+  }
+}
+
 int main(int argc, char **argv){
   
   if (argc!=5) {
