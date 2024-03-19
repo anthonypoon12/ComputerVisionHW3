@@ -205,58 +205,45 @@ void drawLineForArrCoord(int i, std::vector<std::vector<int>> &array2D, int j, s
   double theta = i * M_PI / array2D.size();
   double rho = j * sqrt(numRows * numRows + numCols * numCols) / array2D[i].size();
 
-  double x0 = 0;
-  double y0 = (rho) / sin(theta);
-  if (sin(theta) == 0)
+  double x = 0;
+  double y = (rho) / sin(theta);
+
+  if (y >= 0 && y < numCols)
   {
-    y0 = numCols - 1;
+    points.push_back(x);
+    points.push_back(y);
   }
 
-  if (y0 >= 0 && y0 < numCols)
+  y = 0;
+  x = (rho) / cos(theta);
+
+  if (x >= 0 && x < numRows)
   {
-    points.push_back(x0);
-    points.push_back(y0);
+    points.push_back(x);
+    points.push_back(y);
   }
 
-  double y1 = 0;
-  double x1 = (rho) / cos(theta);
-  if (cos(theta) == 0)
+  x = numRows - 1;
+  y = (rho - (x * cos(theta))) / sin(theta);
+
+  if (y >= 0 && y < numCols)
   {
-    x1 = numRows - 1;
+    points.push_back(x);
+    points.push_back(y);
   }
 
-  if (x1 >= 0 && x1 < numRows)
+  y = numCols - 1;
+  x = (rho - (y * sin(theta))) / cos(theta);
+
+  if (x >= 0 && x < numRows)
   {
-    points.push_back(x1);
-    points.push_back(y1);
+    points.push_back(x);
+    points.push_back(y);
   }
 
-  x0 = numRows - 1;
-  y0 = (rho - (x0 * cos(theta))) / sin(theta);
-  if (sin(theta) == 0)
-  {
-    y0 = numCols - 1;
-  }
-
-  if (y0 >= 0 && y0 < numCols)
-  {
-    points.push_back(x0);
-    points.push_back(y0);
-  }
-
-  y1 = numCols - 1;
-  x1 = (rho - (y1 * sin(theta))) / cos(theta);
-  if (cos(theta) == 0)
-  {
-    x1 = numRows - 1;
-  }
-
-  if (x1 >= 0 && x1 < numRows)
-  {
-    points.push_back(x1);
-    points.push_back(y1);
-  }
-
+  // cout << rho << " " << theta << endl;
+  // cout << int(points[0])<< "," << int(points[1]) << " " << int(points[2]) << "," << int(points[3]) << endl;
+  // cout << endl;
   DrawLine(int(points[0]), int(points[1]), int(points[2]), int(points[3]), 255, &image);
 }
 // @brief Computes and draws lines from Hough transform
