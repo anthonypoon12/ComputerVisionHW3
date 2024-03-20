@@ -2,6 +2,8 @@
 // Anthony Poon
 // Computational Vision Homework 3
 // Program 3
+// Implement Hough Transform for line detection,
+// outputting a hough transform output image and a text file containing the data
 //
 
 #include "image.h"

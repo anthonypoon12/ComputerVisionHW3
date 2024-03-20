@@ -2,6 +2,8 @@
 // Anthony Poon
 // Computational Vision Homework 3
 // Program 4 
+// Finds lines in the image from its Hough Transform space
+// Uses a given threshold to find edges and draw lines on a copy of the original image
 //
 
 #include "image.h"

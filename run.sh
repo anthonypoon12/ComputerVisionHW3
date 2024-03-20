@@ -4,7 +4,7 @@ make all
 ./h1 InputImagesHomework3/hough_simple_1.pgm 1output.pgm
 ./h2 1output.pgm 40 1output2.pgm
 ./h3 1output2.pgm 1output3.pgm a.txt
-./h4 InputImagesHomework3/hough_simple_1.pgm a.txt 170 1output4.pgm
+./h4 InputImagesHomework3/hough_simple_1.pgm a.txt 150 1output4.pgm
 
 
 ./h1 InputImagesHomework3/hough_simple_2.pgm 2output.pgm

@@ -2,6 +2,7 @@
 // Anthony Poon
 // Computational Vision Homework 3
 // Program 1
+// Creates an edge image using Sobel 3x3 operator as a convolution mask
 //
 
 #include "image.h"

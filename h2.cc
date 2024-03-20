@@ -1,7 +1,8 @@
 //
-// Anthony
+// Anthony Poon
 // Computational Vision Homework 3
 // Program 2
+// Creates a binary image from an input image given a threshold input
 //
 
 #include "image.h"
